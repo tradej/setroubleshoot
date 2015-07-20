@@ -68,7 +68,7 @@ class Plugin(object):
     You can also optional pass the name for a single boolean which will be
     used to set the $BOOLEAN subtitution into Plugin.__init__.
 o
-    You can also set the level, of the alert, if the plugin believes discovers 
+    You can also set the level, of the alert, if the plugin believes discovers
     a signature of an attack, the level should be set to red
     * level:  Defines the level of the alert
     ** yellow default
@@ -81,7 +81,7 @@ o
     if_text = _('you want to allow $SOURCE_BASE_PATH to have $ACCESS access on the $TARGET_BASE_PATH $TARGET_CLASS')
     then_text = "No default"
     do_text = "No default"
-        
+
     def __init__(self, name):
         self.analysis_id = re.sub(r'^plugins\.', '', name)
         self.priority = 10
@@ -89,7 +89,7 @@ o
         self.fixable = False
         self.button_text = ""
         self.report_bug = False
-        
+
     def get_problem_description(self, avc, args):
         return self.if_text
 
@@ -114,15 +114,15 @@ o
         """
 
         return SEPlugin(self.analysis_id, args)
-        
+
     def analyze(self, avc):
         return False
 
     def set_priority(self, priority):
         self.priority = priority
-        
+
     def get_priority(self):
-        return self.priority 
+        return self.priority
 
     def check_for_man(self, name):
         man_page = name.split("_")[0] + "_selinux"

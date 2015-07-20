@@ -287,7 +287,7 @@ class SETroubleshootDatabase(object):
 
         if self.max_alert_age:
             # Find the first alert younger than the age threshold, prune everything before that
-            min_time_to_survive = TimeStamp()			# current time
+            min_time_to_survive = TimeStamp()                   # current time
             min_time_to_survive -= self.max_alert_age
             keep = 0
             for siginfo in self.sigs.signature_list:
@@ -329,10 +329,10 @@ class SETroubleshootDatabase(object):
             return
 
         if os.path.exists(self.filepath):
-           stat_info = os.stat(self.filepath)
-           if stat_info[ST_SIZE] > 0:
-               if self.sigs.read_xml_file(self.filepath, 'sigs', validate_database_doc):
-                   self.file_exists = True
+            stat_info = os.stat(self.filepath)
+            if stat_info[ST_SIZE] > 0:
+                if self.sigs.read_xml_file(self.filepath, 'sigs', validate_database_doc):
+                    self.file_exists = True
 
         self.validate()
         self.prune()
@@ -664,4 +664,3 @@ class LogfileAnalyzer(gobject.GObject):
 
 
 gobject.type_register(LogfileAnalyzer)
-

@@ -92,7 +92,7 @@ def log_debug(*msg):
         log_level = get_config('sealert_log', 'level')
     if log_level == "debug":
         syslog.syslog(syslog.LOG_DEBUG, msg)
- 
+
 def database_version_compatible(version):
     major = minor = None
     components = version.split('.')
@@ -120,10 +120,10 @@ def format_elapsed_time(elapsed_time):
 
     hours = whole/3600
     whole = whole - hours*3600
-    
+
     minutes = whole/60
     seconds = whole - minutes*60
-    
+
     if days:
         return "%dd:%dh:%dm:%.3fs" % (days,hours,minutes,seconds+fraction)
     if hours:
@@ -190,7 +190,7 @@ def format_2_column_name_value(name, value, value_indent=30, page_width=80):
         initial_indent = name[0:value_indent-1] + ' '
     else:
         initial_indent = name + ' ' * (value_indent - len(name))
-        
+
 
     if not value or value.isspace():
         return initial_indent + value + '\n'
@@ -244,7 +244,7 @@ def get_standard_directories():
             lst.append(i[0])
     except:
         syslog.syslog(syslog.LOG_ERR, "failed to get filesystem list from rpm")
-        
+
     return lst
 
 def get_rpm_nvr_from_header(hdr):
@@ -433,7 +433,7 @@ def get_plugin_names(filter_glob=None):
 
 def sort_plugins(x,y):
     return x.get_priority()-y.get_priority()
-    
+
 def load_plugins(filter_glob=None):
     plugin_dir = get_config('plugins','plugin_dir')
     plugin_base = os.path.basename(plugin_dir)
@@ -472,10 +472,10 @@ def load_plugins(filter_glob=None):
 
         if mod_fp:
             mod_fp.close()
-    
+
     plugins.sort(sort_plugins)
     return plugins
-                
+
 def get_os_environment():
     try:
         myplatform = open(redhat_release_path).readlines()[0].strip()
@@ -483,7 +483,7 @@ def get_os_environment():
         # dist returns (distname, version, id)
         import platform
         myplatform = ' '.join(platform.dist())
-        
+
     # uname returns (sysname, nodename, release, version, machine)
     uname = os.uname()
     kernel_release = uname[2]
@@ -491,7 +491,7 @@ def get_os_environment():
 
     os_desc = "%s %s" % (kernel_release, cpu)
     return (myplatform, os_desc)
-    
+
 def get_identity(uid=None):
     if uid is None:
         uid = os.getuid()
@@ -641,7 +641,7 @@ class TimeStamp:
             self._dt = t._dt
         else:
             raise TypeError("must be string, float, datetime, or TimeStamp")
-    
+
     def __cmp__(self, other):
         if isinstance(other, TimeStamp):
             return cmp(self._dt, other._dt)
@@ -679,7 +679,7 @@ class TimeStamp:
             return datetime.datetime.now(self.local_tz)
         else:
             return datetime.datetime.now(self.utc_tz)
-    
+
     def local(self):
         return self._dt.astimezone(self.local_tz)
 
@@ -696,7 +696,7 @@ class TimeStamp:
     def add(self,days=0, hours=0, minutes=0, seconds=0):
         self._dt += datetime.timedelta(days=days, hours=hours,
                                        minutes=minutes, seconds=seconds)
-        
+
     def in_future(self):
         now = self.now()
         if now < self._dt:
@@ -718,7 +718,7 @@ class TimeStamp:
             return self.local().strftime(fmt)
         else:
             return self._dt.strftime(fmt)
-        
+
 #------------------------------------------------------------------------------
 
 class Retry(gobject.GObject):
@@ -772,7 +772,7 @@ class Retry(gobject.GObject):
         self.notify_interval = notify_interval  # how often pending_retry signal is emitted
         self.trigger_time = None                # time in future when retry is attempted
         self.timeout_id = None                  # alarm timeout id
-    
+
     def stop(self):
         if self.timeout_id is not None:
             gobject.source_remove(self.timeout_id)
@@ -838,5 +838,3 @@ class Retry(gobject.GObject):
 gobject.type_register(Retry)
 
 #-----------------------------------------------------------------------------
-
-    

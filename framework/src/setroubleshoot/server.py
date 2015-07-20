@@ -47,41 +47,41 @@ from setroubleshoot.access_control import ServerAccess
 from setroubleshoot.analyze import (PluginReportReceiver,
                                     SETroubleshootDatabase,
                                     TestPluginReportReceiver,
-                                    AnalyzeThread, 
-                                    )                                
+                                    AnalyzeThread,
+                                    )
 from setroubleshoot.avc_audit import *
 from setroubleshoot.config import get_config
 if get_config('general', 'use_auparse', bool):
     from setroubleshoot.avc_auparse import *
 else:
     from setroubleshoot.avc_audit import AuditRecordReceiver
-    
+
 from setroubleshoot.errcode import (ProgramError,
-                                    ERR_NOT_AUTHENTICATED, 
-                                    ERR_USER_LOOKUP, 
-                                    ERR_USER_PROHIBITED, 
-                                    ERR_USER_PERMISSION, 
-                                    ERR_FILE_OPEN, 
-                                    ERR_DATABASE_NOT_FOUND, 
+                                    ERR_NOT_AUTHENTICATED,
+                                    ERR_USER_LOOKUP,
+                                    ERR_USER_PROHIBITED,
+                                    ERR_USER_PERMISSION,
+                                    ERR_FILE_OPEN,
+                                    ERR_DATABASE_NOT_FOUND,
                                     )
-                                    
+
 from setroubleshoot.rpc import (RpcChannel,
-                                ConnectionState, 
-                                get_socket_list_from_config, 
-                                ListeningServer, 
+                                ConnectionState,
+                                get_socket_list_from_config,
+                                ListeningServer,
                                 )
-                                
+
 from setroubleshoot.rpc_interfaces import (SETroubleshootServerInterface,
-                                           SETroubleshootDatabaseNotifyInterface, 
-                                           SEAlertInterface, 
+                                           SETroubleshootDatabaseNotifyInterface,
+                                           SEAlertInterface,
                                            )
-from setroubleshoot.util import (get_hostname, 
-                                 make_database_filepath, 
-                                 assure_file_ownership_permissions, 
+from setroubleshoot.util import (get_hostname,
+                                 make_database_filepath,
+                                 assure_file_ownership_permissions,
                                  get_identity, log_debug
                                  )
 #------------------------------ Utility Functions -----------------------------
-    
+
 
 def sighandler(signum, frame):
     log_debug("received signal=%s" % signum)
@@ -90,7 +90,7 @@ def sighandler(signum, frame):
         log_debug("reloading configuration file")
         config.config_init()
         return
-    import sys    
+    import sys
     sys.exit()
 
 def make_instance_id():
@@ -184,7 +184,7 @@ class AlertPluginReportReceiver(PluginReportReceiver):
             if len(to_addrs):
                 from setroubleshoot.email_alert import email_alert
                 email_alert(siginfo, to_addrs)
-        
+
         log_debug("sending alert to all clients")
 
         from setroubleshoot.html_util import html_to_text
@@ -196,9 +196,9 @@ class AlertPluginReportReceiver(PluginReportReceiver):
         systemd.journal.send(siginfo.format_text(), OBJECT_PID=pid)
 
         for u in siginfo.users:
-                action = siginfo.evaluate_filter_for_user(u.username)
-                if action == "ignore":
-                    return siginfo
+            action = siginfo.evaluate_filter_for_user(u.username)
+            if action == "ignore":
+                return siginfo
 
         send_alert_notification(siginfo)
         return siginfo
@@ -277,7 +277,7 @@ class SetroubleshootdClientConnectionHandler(ClientConnectionHandler,
         if host_database.properties.name == database_name:
             return [host_database.properties]
         raise ProgramError(ERR_DATABASE_NOT_FOUND, "database (%s) not found" % database_name)
-        
+
 
     def logon(self, type, username, password):
         log_debug("logon(%s) type=%s username=%s" % (self, type, username))
@@ -330,7 +330,7 @@ class SetroubleshootdClientConnectionHandler(ClientConnectionHandler,
 
         siginfo = self.database.delete_signature(sig)
         return None
-        
+
     def get_properties(self):
         log_debug("get_properties")
 
@@ -375,7 +375,7 @@ class SetroubleshootdClientConnectionHandler(ClientConnectionHandler,
 
         if username != self.username:
             raise ProgramError(ERR_USER_PERMISSION, detail=_("The user (%s) cannot modify data for (%s)") % (self.username, username))
-        
+
         self.database.set_filter(sig, username, filter_type, data)
         return None
 
@@ -438,7 +438,7 @@ class SetroubleshootdDBusObject(dbus.service.Object):
         self.conn_ctr += 1
         log_debug('dbus iface start() called: %d Connections' % self.conn_ctr)
         return _("Started")
-    
+
     @dbus.service.method(dbus_system_interface, sender_keyword="sender", in_signature='s', out_signature='ii')
     def check_for_new(self, last_seen_id, sender):
         username = get_identity(self.connection.get_unix_user(sender))
@@ -449,9 +449,9 @@ class SetroubleshootdDBusObject(dbus.service.Object):
             action = sig.evaluate_filter_for_user(username)
             if action != "ignore":
                 signatures.append(sig)
-                
+
         signatures.sort(compare_sig)
-        
+
         count = 0
         red = 0
         for sig in signatures:
@@ -461,7 +461,7 @@ class SetroubleshootdDBusObject(dbus.service.Object):
             if sig.local_id == last_seen_id:
                 red = 0
                 count = 0
-            
+
         return count, red
 
     @dbus.service.method(dbus_system_interface, in_signature='s',  out_signature='s')
@@ -495,7 +495,7 @@ class SetroubleshootdDBusObject(dbus.service.Object):
 
     def alarm(self, timeout = 10):
         if self.conn_ctr == 0:
-            signal.alarm(timeout) 
+            signal.alarm(timeout)
 
 def compare_sig(a, b):
     return cmp(a.last_seen_date, b.last_seen_date)
@@ -591,7 +591,7 @@ def RunFaultServer(timeout=10):
         analyze_thread = AnalyzeThread(analysis_queue)
         analyze_thread.setDaemon(True)
         analyze_thread.start()
-    
+
         # Create a thread to receive messages from the audit system.
         # This is a time sensitive operation, the primary job of this
         # thread is to receive the audit message as quickly as

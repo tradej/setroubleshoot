@@ -39,7 +39,7 @@ def parse_email_addr(addr):
         user = match.group(1)
         domain = match.group(3)
     return (user, domain)
-    
+
 def email_alert(siginfo, to_addrs):
     smtp_host    = get_config('email','smtp_host')
     smtp_port    = get_config('email','smtp_port', int)
@@ -57,7 +57,7 @@ def email_alert(siginfo, to_addrs):
     siginfo.update_derived_template_substitutions()
     summary = siginfo.substitute(siginfo.summary())
     subject = '[%s] %s' % (get_config('email','subject'), summary)
-    text = siginfo.format_text() + siginfo.format_details() 
+    text = siginfo.format_text() + siginfo.format_details()
 
     email_msg            = MIMEMultipart('alternative')
     email_msg['Subject'] = subject

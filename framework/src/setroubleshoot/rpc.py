@@ -40,7 +40,7 @@ __all__ = [
     'rpc_callback',
     'rpc_signal',
     'interface_registry',
-    
+
     'parse_socket_address_list',
     'get_default_port',
     'get_socket_list_from_config',
@@ -67,7 +67,7 @@ def parse_socket_address_list(addr_string, default_port=None):
     family_re = re.compile('\s*{(unix|inet)}(.+)')
 
     log_debug("parse_socket_address_list: input='%s'" %  addr_string)
-    if not addr_string: 
+    if not addr_string:
         return socket_addresses
     addrs = re.split('[\s,]+', addr_string)
     for cfg_addr in addrs:
@@ -134,7 +134,7 @@ def rpc_header(body, **kwds):
 def rpc_message(rpc_id, type, body):
     hdr = rpc_header(body, rpc_id=rpc_id, type=type)
     return hdr+body
-    
+
 def convert_rpc_xml_to_args(cmd):
     interface = method = args = doc = None
     try:
@@ -254,7 +254,7 @@ class ConnectionState(gobject.GObject):
     def __str__(self):
         return "flags=%s, result_code=%d, result_msg=%s" % \
                (self.flags_to_string(self.flags), self.result_code, self.result_msg)
-    
+
     def clear(self):
         self.update(0, self.ALL_FLAGS)
 
@@ -359,7 +359,7 @@ class RpcDefinition(object):
             self.callback = callback_name
             return callback_def
         return interface_registry.get_rpc_def(self.interface, self.callback)
-        
+
     def set_positional_args(self, arg_names):
         if arg_names is not None:
             self.positional_args = preextend_list(len(arg_names), self.positional_args, RpcArg)
@@ -368,7 +368,7 @@ class RpcDefinition(object):
                 rpc_arg = self.positional_args[position]
                 rpc_arg.name = arg_name
                 position += 1
-        
+
     def set_arg_obj_types(self, *obj_types):
         if obj_types is not None:
             self.positional_args = preextend_list(len(obj_types), self.positional_args, RpcArg)
@@ -377,7 +377,7 @@ class RpcDefinition(object):
                 rpc_arg = self.positional_args[position]
                 rpc_arg.obj_type = obj_type
                 position += 1
-        
+
     def get_positional_arg_names(self):
         return [rpc_arg.name for rpc_arg in self.positional_args]
 
@@ -419,13 +419,13 @@ class InterfaceRegistry(object):
             rpc_def = RpcDefinition(None, interface, method, None)
             self.register_rpc_def(interface, method, rpc_def)
         return rpc_def
-        
+
     def register_rpc_def(self, interface, method, rpc_def):
         interface_dict = self.get_interface(interface)
         if type(method) == MethodType:
             method = method.__name__
         interface_dict[method] = rpc_def
-        
+
     def get_error_rpc_def(self, interface):
         interface_dict = self.get_interface(interface)
         return interface_dict['_error_return']
@@ -435,17 +435,17 @@ class InterfaceRegistry(object):
         interface_names.sort()
         for interface_name in interface_names:
             interface = self.interfaces[interface_name]
-            print "Interface: %s" % interface_name
+            print("Interface: %s" % interface_name)
             method_names = interface.keys()
             method_names.sort()
             for method_name in method_names:
                 method = interface[method_name]
-                print "    %s" % str(method)
+                print("    %s" % str(method))
 
 interface_registry = InterfaceRegistry()
 
 #-------------------------------- Decorators ---------------------------------
-    
+
 def rpc_method(interface):
     def decorator(method_ptr):
         rpc_def = interface_registry.set_rpc_def('method', interface, method_ptr)
@@ -595,7 +595,7 @@ class ConnectionIO(object):
         self.io_watch_remove()
         self.io_watch_id = gobject.io_add_watch(self.socket_address.socket,
                                                 self.io_input_conditions, callback)
-        
+
     def io_watch_remove(self):
         if self.io_watch_id is not None:
             gobject.source_remove(self.io_watch_id)
@@ -621,7 +621,7 @@ class ConnectionIO(object):
             return False
         else:
             return True
-        
+
 #-----------------------------------------------------------------------------
 
 class ListeningServer(ConnectionIO):
@@ -699,14 +699,14 @@ class RequestReceiver:
     def __init__(self, dispatchFunc):
         self.dispatchFunc = dispatchFunc
         self.reset()
-    
+
     def reset(self):
         self.headerLen = -1
         self.bodyLen = 0
         self.header = None
         self.body = ''
         self.feed_buf = ''
-        
+
     def process(self):
         if len(self.feed_buf) == 0:
             # No data, nothing to process
@@ -759,14 +759,14 @@ class RequestReceiver:
 
 class RpcManage(object):
     def __init__(self):
-	self.async_rpc_cache = {}
+        self.async_rpc_cache = {}
         self.rpc_handlers = {}
         self.rpc_id = 0
 
     def new_rpc_id(self):
         self.rpc_id +=1
         return str(self.rpc_id)
-    
+
     def dump_async_rpc_cache(self):
         log_debug("async_rpc_cache: %d entries, cur rpc_id=%s" % (len(self.async_rpc_cache), self.rpc_id))
         rpc_ids = self.async_rpc_cache.keys()
@@ -796,7 +796,7 @@ class RpcManage(object):
 
     def connect_rpc_interface(self, interface, handler):
         self.rpc_handlers[interface] = handler
-        
+
 #-----------------------------------------------------------------------------
 
 class RpcChannel(ConnectionIO, RpcManage):
@@ -817,10 +817,10 @@ class RpcChannel(ConnectionIO, RpcManage):
 
     def release_write_lock(self):
         self.write_lock.release()
-        
+
     def set_channel_type(self, channel_type):
         self.channel_type = channel_type
-        
+
     def get_channel_type(self):
         return self.channel_type
 
@@ -931,12 +931,12 @@ class RpcChannel(ConnectionIO, RpcManage):
         self.process_async_return(async_rpc)
 
     def default_request_handler(self, header, body):
-	rpc_id    = header.get('rpc_id', 0)
-	type      = header.get('type', None)
+        rpc_id    = header.get('rpc_id', 0)
+        type      = header.get('type', None)
 
         log_debug("%s.default_request_handler: rpc_id=%s type=%s {%s}" % (self.__class__.__name__, rpc_id, type, body))
 
-	if type == 'error_return' or type == 'method_return':
+        if type == 'error_return' or type == 'method_return':
             self.handle_return(type, rpc_id, body)
         elif type == 'method':
             interface, method, args = convert_rpc_xml_to_args(body)
@@ -982,7 +982,7 @@ class AsyncRpc(object):
         self.return_type = None
         self.callbacks = []
         self.errbacks = []
-        
+
     def add_callback(self, callback):
         self.callbacks.append(callback)
 
@@ -990,5 +990,3 @@ class AsyncRpc(object):
         self.errbacks.append(errback)
 
 #-----------------------------------------------------------------------------
-
-

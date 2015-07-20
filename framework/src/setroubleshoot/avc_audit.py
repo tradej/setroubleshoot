@@ -20,7 +20,7 @@
 __all__ = [
     'AuditSocketReceiverThread',
     'AuditRecordReceiver',              # FIXME, do we really want to export this?
-    'verify_avc', 
+    'verify_avc',
     ]
 
 import syslog
@@ -159,7 +159,7 @@ class AuditRecordReceiver:
 
     def add_record_to_cache(self, record):
         log_debug("%s.add_record_to_cache(): %s" % (self.__class__.__name__, record))
-        
+
         audit_event = self.get_event_from_record(record)
         if record.record_type == 'EOE':
             if audit_event:
@@ -191,7 +191,7 @@ class AuditRecordReceiver:
 
         if len(self.cache) > self.max_cache_length:
             self.max_cache_length = len(self.cache)
-            
+
         event_ids = self.cache.keys()
 
         # flush everything
@@ -221,7 +221,7 @@ class AuditRecordReceiver:
     def close(self):
         """Emit every event in the cache irrespective of its
         timestamp. This means we're done, nothing should remain buffered."""
-        
+
         for audit_event in self.flush(0):
             yield audit_event
 
@@ -311,7 +311,7 @@ class AuditSocketReceiverThread(threading.Thread):
 
     def run(self):
         self.connect()
-        
+
         timeout = self.timeout_interval
         while True:
             inList, outList, errList = select.select([self.audit_socket],[], [], timeout)
@@ -349,4 +349,3 @@ class AuditSocketReceiverThread(threading.Thread):
             except Exception, e:
                 syslog.syslog(syslog.LOG_ERR, "exception %s: %s" % (e.__class__.__name__, str(e)))
                 return
-

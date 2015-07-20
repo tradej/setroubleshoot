@@ -93,7 +93,7 @@ def string_to_xmlnode(doc, value):
 
 def string_to_cdata_xmlnode(doc, value):
     return doc.newCDataBlock(value, len(value))
-    
+
 # newChild() content is a string, which will be added as children
 
 # addChild() adds xmlNode
@@ -103,7 +103,7 @@ def string_to_cdata_xmlnode(doc, value):
 # newChild --> newDocNode --> newNode;stringGetNodeList(content) # note: this inserts entity nodes if content contains &;
 
 # xmlEncodeEntitiesReentrant called from xmlNodeListGetString
-# xmlEncodeSpecialChars called from xmlNodeListGetRawString 
+# xmlEncodeSpecialChars called from xmlNodeListGetRawString
 #------------------------------------------------------------------------
 
 def xml_attributes(node):
@@ -427,6 +427,3 @@ class XmlSerialize(object):
                     else:
                         value = element_node.getContent()
                         self.__setattr__(name, typecast(value))
-
-
-

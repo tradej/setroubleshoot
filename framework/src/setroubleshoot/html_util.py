@@ -80,7 +80,7 @@ class TextWriter(Formatter.DumbWriter):
             atbreak = 1
         self.col = col
         self.atbreak = data[-1] in string.whitespace
-            
+
 class HTMLParserAnchor(htmllib.HTMLParser):
 
     def __init__(self, formatter, verbose=0):
@@ -165,4 +165,3 @@ def html_document(*body_components):
 
     doc += tail
     return doc
-

@@ -169,5 +169,3 @@ class SEAlertInterface:
     @rpc_arg_type('SEAlert', SEFaultSignatureInfo)
     def alert(siginfo):
         pass
-
-

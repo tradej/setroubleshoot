@@ -63,7 +63,7 @@ class UUID(object):
     six integer fields (with 32-bit, 16-bit, 16-bit, 8-bit, 8-bit, and
     48-bit values respectively) as an argument named 'fields', or a single
     128-bit integer as an argument named 'int'.
-    
+
     UUIDs have these read-only attributes:
 
         bytes       the UUID as a 16-byte string

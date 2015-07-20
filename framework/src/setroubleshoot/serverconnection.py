@@ -32,9 +32,9 @@ class ServerConnectionHandler(RpcChannel,
         (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT,)),
         'connection_state_changed': # callback(connection_state, flags, flags_added, flags_removed):
         (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT, gobject.TYPE_INT, gobject.TYPE_INT, gobject.TYPE_INT)),
-        'signatures_updated': 
+        'signatures_updated':
         (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT)),
-        'database_bind': 
+        'database_bind':
         (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT, gobject.TYPE_PYOBJECT)),
         'async-error': # callback(method, errno, strerror)
         (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gobject.TYPE_STRING, gobject.TYPE_INT, gobject.TYPE_STRING)),
@@ -102,13 +102,13 @@ class ServerConnectionHandler(RpcChannel,
             self.close_connection(add_flags, ConnectionState.CONNECTING, errno, strerror)
             return False
         return True
-            
+
     def retry_connection(self, retry, user_data):
         if self.open(self.socket_address):
             return True
         else:
             return False
-        
+
     def get_connection_retry_interval(self, retry, user_data):
         if retry.failed_attempts < 5:
             return 10
