@@ -3,6 +3,8 @@ how you can use it.
 
 Impatient users can skip to "Simple Testing Scenario:" :-)
 
+Requirements: libxml2-python3 python3-systemd
+
 If you want to test "in the tree" (e.g. not installed) then export
 PYTHONPATH=/repository/framework where repository is the root of
 mercurial tree. Note, you much have done a .autogen.sh followed by a

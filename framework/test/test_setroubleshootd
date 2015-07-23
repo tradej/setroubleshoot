@@ -20,12 +20,16 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
+from __future__ import print_function
+from builtins import str
+from builtins import object
+
 import audit
 import fnmatch
 import gettext
 import getopt
 import glob
-import gobject
+import gi as gobject
 import os
 import time
 import re
@@ -36,11 +40,7 @@ import subprocess
 prog_name = 'test_setroubleshootd'
 
 from setroubleshoot.config import parse_config_setting, get_config
-gettext.install(domain = prog_name, unicode = False, codeset = 'utf-8')
-from setroubleshoot.log import log_init
-log_init(sys.argv[0], {'console':True,
-                       'level':'error'})
-from setroubleshoot.log import *
+gettext.install(domain = prog_name, codeset = 'utf-8')
 
 from setroubleshoot.errcode import *
 from setroubleshoot.rpc import *
@@ -114,7 +114,7 @@ class SubProcess(gobject.GObject):
         (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gobject.TYPE_STRING, gobject.TYPE_STRING,)),
         }
 
-    class IO:
+    class IO(object):
         def __init__(self):
             self.watch_id = None
             self.buf = ''
@@ -193,7 +193,7 @@ gobject.type_register(SubProcess)
 
 def auparse_feed_callback(au, cb_event_type, audit_event_handler):
     if debug:
-        log_avc.debug("auparse_feed_callback()")
+        syslog.syslog(syslog.LOG_DEBUG, "auparse_feed_callback()")
     try:
 
         if cb_event_type == auparse.AUPARSE_CB_EVENT_READY:
@@ -225,8 +225,8 @@ def auparse_feed_callback(au, cb_event_type, audit_event_handler):
 
                 if not au.next_record(): break
 
-    except Exception, e:
-        log_avc.exception("auparse_feed_callback() exception %s: %s",e.__class__.__name__, str(e))
+    except Exception as e:
+        syslog.syslog(syslog.LOG_ERR, "auparse_feed_callback() exception %s: %s", e.__class__.__name__, str(e))
         return
 
 #================================== AuParse ==================================
@@ -241,11 +241,11 @@ class AuditClientConnectionHandler(ClientConnectionHandler):
         ClientConnectionHandler.on_connection_state_change(self, connection_state, flags, flags_added, flags_removed)
 
         if flags_removed & ConnectionState.OPEN:
-            print "client disconnect"
+            print("client disconnect")
             connection_pool.remove_client(self)
 
         if flags_added & ConnectionState.OPEN:
-            print "client connect"
+            print("client connect")
             connection_pool.add_client(self)
             self.out_fd = self.socket_address.socket.makefile()
             #idle_proc_id = gobject.idle_add(feed_clients().next)
@@ -291,15 +291,15 @@ def send_log_file(filepath, out_fd):
         last_audit_record = record
         output = record_formatter(record)
         if debug:
-            log_avc.debug("output: %s", output)
+            syslog.syslog(syslog.LOG_DEBUG, "output: %s", output)
 
         os.write(out_fd.fileno(), output)
         last_audit_record = record
 
-    print >> sys.stderr, "sending: %s" % os.path.basename(filepath)
+    print("sending: %s" % os.path.basename(filepath), file=sys.stderr)
     try:
         f = open(filepath)
-    except Exception, e:
+    except Exception as e:
         program.error("cannot open '%s' [%s]", filepath, e.strerror)
         return
 
@@ -335,7 +335,7 @@ def send_log_file(filepath, out_fd):
 def feed_clients():
     for client in connection_pool.clients():
         out_fd = client.out_fd
-        filepaths = test_files.values()
+        filepaths = list(test_files.values())
         filepaths.sort()
         for filepath in filepaths:
             send_log_file(filepath, out_fd)
@@ -353,7 +353,7 @@ def send_file_names(file_names):
 def send_file_names_to_clients(file_names):
     clients = [client for client in connection_pool.clients()]
     if len(clients) == 0:
-        print "no clients connected"
+        print("no clients connected")
         return
     for client in clients:
         out_fd = client.out_fd
@@ -367,9 +367,9 @@ def send_file_names_to_fd(file_names, out_fd):
 
 def input_prompt():
     if prev_command:
-        print >> sys.stdout, prompt+"[%s] " % prev_command,
+        print(prompt+"[%s] " % prev_command, end=' ', file=sys.stdout)
     else:
-        print >> sys.stdout, prompt,
+        print(prompt, end=' ', file=sys.stdout)
     sys.stdout.flush()
 
 def handle_stdin(file, io_condition):
@@ -398,7 +398,7 @@ def process_command_input(line):
         else:
             if words[0] == 'next':
                 if len(test_file_names) == 0:
-                    print "no test files"
+                    print("no test files")
                     return
                 if test_file_index >= len(test_file_names):
                     test_file_index = 0
@@ -412,16 +412,16 @@ def process_command_input(line):
                     matches = fnmatch.filter(test_file_names, word)
                     for match in matches:
                         files[match] = 1
-                files = files.keys()
+                files = list(files.keys())
                 if len(files) > 0:
-                    print "sending files %s" % files
+                    print("sending files %s" % files)
                     send_file_names(files)
                 else:
-                    print "no matches for %s" % ' '.join(words)
+                    print("no matches for %s" % ' '.join(words))
     elif cmd == 'list' or cmd == 'l':
-        print test_file_names
+        print(test_file_names)
     elif cmd == 'help' or cmd == 'h':
-        print '''
+        print('''
 send|s [all|next|<name>] default=all
                          all:    sends all the log files
                          next:   sends the next log file in the log file list
@@ -429,11 +429,11 @@ send|s [all|next|<name>] default=all
 list|l                   print the list of log files
 quit|q                   exit the program
 help|h                   print this information
-'''
+''')
     elif cmd == 'quit' or cmd == 'q':
         sys.exit(0)
     else:
-        print "command = '%s' not recognized" % cmd
+        print("command = '%s' not recognized" % cmd)
 
 
 #-----------------------------------------------------------------------------
@@ -442,7 +442,7 @@ help|h                   print this information
 test_file_dir = 'data/audit'
 
 def usage():
-    print '''
+    print('''
 -a --audit-socket	audit message socket (default=%(audit_socket_path)s)
 -o --out    		- for stdout, unix for AF_UNIX socket
 -s --srcfiles		shell glob syntax specifying src log file to send
@@ -456,9 +456,9 @@ run setroubleshootd this way (add -V for console debug output):
 setroubleshootd -f -c audit.text_protocol_socket_path=/tmp/audispd_events
 
 ''' % {'audit_socket_path'   : audit_socket_path,
-       'valid_record_formats': '|'.join(record_format_map.keys()),
+       'valid_record_formats': '|'.join(list(record_format_map.keys())),
        'test_file_dir'       : test_file_dir
-       }
+       })
 try:
     opts, args = getopt.getopt(sys.argv[1:],
                                "a:o:s:f:c:hD:v",
@@ -477,7 +477,7 @@ for o, a in opts:
         elif a == 'unix':
             output_dst = 'unix'
         else:
-            print >> sys.stderr, "ERROR: output destination (%s) invalid, must be -|stdout|unix" % (a)
+            print("ERROR: output destination (%s) invalid, must be -|stdout|unix" % (a), file=sys.stderr)
             sys.exit(1)
 
     if o in ("-s", "--srcfiles"):
@@ -491,8 +491,8 @@ for o, a in opts:
 
     if o in ("-f", "--format"):
         if a not in record_format_map:
-            print >> sys.stderr, "ERROR: record format (%s) invalid, must be one of %s" % \
-                  (a, ','.join(record_format_map.keys()))
+            print("ERROR: record format (%s) invalid, must be one of %s" % \
+                  (a, ','.join(list(record_format_map.keys()))), file=sys.stderr)
             sys.exit(1)
         record_format_name = a
 
@@ -500,7 +500,7 @@ for o, a in opts:
         config_setting = a
         from setroubleshoot.config import parse_config_setting
         if not parse_config_setting(config_setting):
-            log_program.error("could not parse config setting '%s'", config_setting)
+           syslog.syslog(syslog.LOG_ERR, "could not parse config setting '%s'", config_setting)
 
     if o in ("-v", "--verbose"):
         verbose = True
@@ -522,18 +522,18 @@ for filepath in filepaths:
     name = os.path.basename(filepath)
     name = os.path.splitext(name)[0]
     test_files[name] = filepath
-test_file_names = test_files.keys()
+test_file_names = list(test_files.keys())
 test_file_names.sort()
 
 
 if verbose:
-    print "using test logs [%s]" % ' '.join(test_file_names)
+    print("using test logs [%s]" % ' '.join(test_file_names))
 
 if output_dst == 'stdout':
     send_file_names(test_file_names)
 elif output_dst == 'unix':
 
-    log_program.info("opening %s sockets in %s protocol format",
+    syslog.syslog(syslog.LOG_DEBUG, "opening %s sockets in %s protocol format",
                      listen_addresses, protocol_formats_to_text[record_format])
     for listen_address in parse_socket_address_list(listen_addresses):
         listening_server = ListeningServer(listen_address, AuditClientConnectionHandler)
@@ -546,9 +546,6 @@ elif output_dst == 'unix':
     main_loop.run()
 
 else:
-    log_program.error("unknown output destination (%s)", output_dst)
-    
-
-
+    syslog.syslog(syslog.LOG_ERR, "unknown output destination (%s)", output_dst)
 
 
